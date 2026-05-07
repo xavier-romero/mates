@@ -7,8 +7,10 @@ OPERATIONS = {
 }
 
 # Answering within this time gives full score, otherwise apply penalty
-TIME_NO_PENALTY = 5  # seconds
+TIME_NO_PENALTY = 4  # seconds
 # Score penalty per second after the no-penalty time
-PENALTY_PER_SECOND = 10
+PENALTY_PER_SECOND = 12
 # It will keep asking questions until the player reaches this score
-TARGET_SCORE = 2500
+TARGET_SCORE = 3500
+# Repeat failes questions after this many questions in between
+REPEAT_FAILED_AFTER = 10

@@ -1,7 +1,6 @@
 import random
 import time
-import threading
-from config import OPERATIONS, PENALTY_PER_SECOND, TARGET_SCORE, TIME_NO_PENALTY
+from config import OPERATIONS, PENALTY_PER_SECOND, TARGET_SCORE, TIME_NO_PENALTY, REPEAT_FAILED_AFTER
 
 # This assigns an scopre to the operation based on the difficulty of the question
 def rate_score_operation(a, op, b, answer, base_score):
@@ -87,21 +86,25 @@ def main():
 
     while my_score < TARGET_SCORE:
         q_counter += 1
-        if failed_stack and failed_stack[0][0] < q_counter - 5:  # retry questions after 3 new ones
+        if failed_stack and failed_stack[0][0] < q_counter - REPEAT_FAILED_AFTER:  # retry questions after REPEAT_FAILED_AFTER new ones
             _, text, answer, score = failed_stack.pop(0)
         else:
             text, answer, score = generate_question()
         q = (f"\n[{my_score}/{TARGET_SCORE}] Question 🤔 {text} = ")
 
         start = time.time()
-        user_input = input(q)
-        time_taken = time.time() - start
 
-        try:
-            user_input = int(user_input)
-        except:
-            print(f"⚠️ Invalid input: {user_input}. Expected a number.")
-            continue
+        while True:
+            user_input = input(q)
+            try:
+                user_input = int(user_input)
+            except:
+                if q.startswith("\n"):
+                    q = q[1:]
+                continue
+            else:
+                time_taken = time.time() - start
+                break
 
         if user_input == answer:
             penalty_time = max(0, time_taken - TIME_NO_PENALTY)
