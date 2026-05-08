@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Math Quiz</title>
+  <title>Mates Quiz</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f7f9fc; color: #222; margin: 0; padding: 0; }
     .page { max-width: 720px; margin: 3rem auto; padding: 1.5rem; background: white; border-radius: 16px; box-shadow: 0 18px 50px rgba(23, 46, 88, 0.09); }
@@ -19,28 +19,28 @@
 </head>
 <body>
   <main class="page">
-    <h1>Math Quiz</h1>
+    <h1>Mates Quiz</h1>
 
     {% if not state.started %}
-      <p>Welcome to the quiz. Click below to start the same scoring game from the terminal in your browser.</p>
+      <p>Benvingut al quiz. Click a sota per començar el joc!</p>
       <form action="{{ url_for('start') }}" method="post">
         <button type="submit">Start Quiz</button>
       </form>
     {% elif state.done %}
       <div class="status">
-        <h2>Quiz complete!</h2>
-        <p>Your score: <strong>{{ state.my_score }}</strong> / {{ target_score }}</p>
-        <p>Total questions answered: <strong>{{ state.q_counter }}</strong></p>
-        <p>Total time: <strong>{{ state.global_time_seconds | round(2) }}</strong> seconds</p>
+        <h2>Quiz complet!</h2>
+        <p>Puntuació: <strong>{{ state.my_score }}</strong> / {{ target_score }}</p>
+        <p>Preguntes respostes: <strong>{{ state.q_counter }}</strong></p>
+        <p>Temps total: <strong>{{ state.global_time_seconds | round(2) }}</strong> segons</p>
       </div>
       <form action="{{ url_for('restart') }}" method="post">
-        <button type="submit">Restart Quiz</button>
+        <button type="submit">Reiniciar Quiz</button>
       </form>
     {% else %}
       <div class="status">
-        <p>Score: <strong>{{ state.my_score }}</strong> / {{ target_score }}</p>
-        <p>Question: <strong>{{ state.q_counter }}</strong></p>
-        <p class="small">Full score if answered within {{ time_no_penalty }} seconds, then -{{ penalty_per_second }} per extra second.</p>
+        <p>Puntuació: <strong>{{ state.my_score }}</strong> / {{ target_score }}</p>
+        <p>Pregunta: <strong>{{ state.q_counter }}</strong></p>
+        <p class="small">Puntuació completa si es respon en {{ time_no_penalty }} segons, després -{{ penalty_per_second }} per segon extra.</p>
       </div>
 
       {% if state.last_message %}
@@ -50,12 +50,12 @@
       <div class="question">{{ state.current_text }} =</div>
       <form action="{{ url_for('answer') }}" method="post">
         <input type="text" name="answer" autocomplete="off" autofocus />
-        <button type="submit">Submit answer</button>
+        <button type="submit">Enviar resposta</button>
       </form>
 
       <div class="footer">
         <form action="{{ url_for('restart') }}" method="post">
-          <button type="submit">Restart Quiz</button>
+          <button type="submit">Reiniciar Quiz</button>
         </form>
       </div>
     {% endif %}

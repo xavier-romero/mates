@@ -107,11 +107,11 @@ def answer():
         this_score = max((state["current_score"] - int(penalty_time * PENALTY_PER_SECOND)), 0)
         state["my_score"] += this_score
         state["last_message"] = (
-            f"✅ Correct! Time: {time_taken:.2f}s, score: {this_score}"
+            f"✅ Correcte! Temps: {time_taken:.2f}s, puntuació: {this_score}"
         )
     else:
         state["last_message"] = (
-            f"❌ Wrong answer. Correct answer: {state['current_answer']}"
+            f"❌ Resposta incorrecta. Resposta correcta: {state['current_answer']}"
         )
         state["failed_stack"].append(
             {
@@ -143,4 +143,5 @@ def restart():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port, debug=False)
