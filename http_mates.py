@@ -24,6 +24,7 @@ def new_quiz_state():
         "global_time_start": None,
         "global_time_seconds": 0.0,
         "last_message": None,
+        "history": [],
     }
 
 
@@ -32,6 +33,9 @@ def get_state():
     if state is None:
         state = new_quiz_state()
         session[SESSION_KEY] = state
+    else:
+        if "history" not in state:
+            state["history"] = []
     return state
 
 
@@ -109,7 +113,10 @@ def answer():
         state["last_message"] = (
             f"✅ Correcte! Temps: {time_taken:.2f}s, puntuació: {this_score}"
         )
+        result_status = "Correcte"
     else:
+        this_score = 0
+        result_status = "Incorrecta"
         state["last_message"] = (
             f"❌ Resposta incorrecta. Resposta correcta: {state['current_answer']}"
         )
@@ -121,6 +128,18 @@ def answer():
                 "score": state["current_score"],
             }
         )
+
+    state["history"].insert(
+        0,
+        {
+            "question": state["current_text"],
+            "given_answer": user_input,
+            "correct_answer": state["current_answer"],
+            "points": this_score,
+            "time": f"{time_taken:.2f}s",
+            "status": result_status,
+        },
+    )
 
     if state["my_score"] >= TARGET_SCORE:
         state["done"] = True

@@ -6,7 +6,8 @@
   <title>Mates Quiz</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f7f9fc; color: #222; margin: 0; padding: 0; }
-    .page { max-width: 720px; margin: 3rem auto; padding: 1.5rem; background: white; border-radius: 16px; box-shadow: 0 18px 50px rgba(23, 46, 88, 0.09); }
+    .page { max-width: 960px; margin: 3rem auto; padding: 1.5rem; background: white; border-radius: 16px; box-shadow: 0 18px 50px rgba(23, 46, 88, 0.09); }
+    .grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 1.5rem; }
     h1, h2 { margin-top: 0; }
     .status { margin: 1rem 0; padding: 1rem; border-radius: 12px; background: #eef6ff; }
     .message { margin: 1rem 0; padding: 0.95rem 1rem; border-radius: 10px; background: #fff7e6; border: 1px solid #ffdd99; }
@@ -15,6 +16,14 @@
     button { cursor: pointer; border: none; border-radius: 10px; padding: 12px 18px; font-size: 1rem; background: #3b82f6; color: white; }
     .small { color: #555; font-size: 0.95rem; }
     .footer { margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+    .history-panel { padding: 1rem; border-radius: 16px; background: #f4f7ff; border: 1px solid #d8e1ff; max-height: 640px; overflow-y: auto; }
+    .history-panel h3 { margin-top: 0; }
+    .history-entry { margin-bottom: 1rem; padding: 0.85rem 1rem; border-radius: 12px; background: white; border: 1px solid #dee3f2; }
+    .history-entry:last-child { margin-bottom: 0; }
+    .history-entry p { margin: 0.25rem 0; }
+    .history-status { font-weight: 700; }
+    .history-correct { color: #0f7a32; }
+    .history-incorrect { color: #b91c1c; }
   </style>
 </head>
 <body>
@@ -27,36 +36,83 @@
         <button type="submit">Start Quiz</button>
       </form>
     {% elif state.done %}
-      <div class="status">
-        <h2>Quiz complet!</h2>
-        <p>Puntuació: <strong>{{ state.my_score }}</strong> / {{ target_score }}</p>
-        <p>Preguntes respostes: <strong>{{ state.q_counter }}</strong></p>
-        <p>Temps total: <strong>{{ state.global_time_seconds | round(2) }}</strong> segons</p>
+      <div class="grid">
+        <div>
+          <div class="status">
+            <h2>Quiz complet!</h2>
+            <p>Puntuació: <strong>{{ state.my_score }}</strong> / {{ target_score }}</p>
+            <p>Preguntes respostes: <strong>{{ state.q_counter }}</strong></p>
+            <p>Temps total: <strong>{{ state.global_time_seconds | round(2) }}</strong> segons</p>
+          </div>
+          <form action="{{ url_for('restart') }}" method="post">
+            <button type="submit">Reiniciar Quiz</button>
+          </form>
+        </div>
+        <aside class="history-panel">
+          <h3>Historial de preguntes</h3>
+          {% if state.history %}
+            {% for item in state.history %}
+              <div class="history-entry">
+                <p class="history-line {{ 'history-correct' if item.status == 'Correcte' else 'history-incorrect' }}">
+                  {{ item.question }} = {{ item.given_answer }}
+                  {% if item.status == 'Correcte' %}
+                    ✅ {{ item.points }} punts ({{ item.time }})
+                  {% else %}
+                    ❌
+                  {% endif %}
+                </p>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>Encara no hi ha historial.</p>
+          {% endif %}
+        </aside>
       </div>
-      <form action="{{ url_for('restart') }}" method="post">
-        <button type="submit">Reiniciar Quiz</button>
-      </form>
     {% else %}
-      <div class="status">
-        <p>Puntuació: <strong>{{ state.my_score }}</strong> / {{ target_score }}</p>
-        <p>Pregunta: <strong>{{ state.q_counter }}</strong></p>
-        <p class="small">Puntuació completa si es respon en {{ time_no_penalty }} segons, després -{{ penalty_per_second }} per segon extra.</p>
-      </div>
+      <div class="grid">
+        <div>
+              <div class="status">
+            <p>Puntuació: <strong>{{ state.my_score }}</strong> / {{ target_score }}</p>
+            <p>Pregunta: <strong>{{ state.q_counter }}</strong></p>
+            <p class="small">Puntuació completa si es respon en {{ time_no_penalty }} segons, després -{{ penalty_per_second }} per segon extra.</p>
+          </div>
 
-      {% if state.last_message %}
-        <div class="message">{{ state.last_message }}</div>
-      {% endif %}
+          {% if state.last_message %}
+            <div class="message">{{ state.last_message }}</div>
+          {% endif %}
 
-      <div class="question">{{ state.current_text }} =</div>
-      <form action="{{ url_for('answer') }}" method="post">
-        <input type="text" name="answer" autocomplete="off" autofocus />
-        <button type="submit">Enviar resposta</button>
-      </form>
+          <div class="question">{{ state.current_text }} =</div>
+          <form action="{{ url_for('answer') }}" method="post">
+            <input type="text" name="answer" autocomplete="off" autofocus />
+            <button type="submit">Enviar resposta</button>
+          </form>
 
-      <div class="footer">
-        <form action="{{ url_for('restart') }}" method="post">
-          <button type="submit">Reiniciar Quiz</button>
-        </form>
+          <div class="footer">
+            <form action="{{ url_for('restart') }}" method="post">
+              <button type="submit">Reiniciar Quiz</button>
+            </form>
+          </div>
+        </div>
+
+        <aside class="history-panel">
+          <h3>Historial de preguntes</h3>
+          {% if state.history %}
+            {% for item in state.history %}
+              <div class="history-entry">
+                <p class="history-line {{ 'history-correct' if item.status == 'Correcte' else 'history-incorrect' }}">
+                  {{ item.question }} = {{ item.given_answer }}
+                  {% if item.status == 'Correcte' %}
+                    ✅ {{ item.points }} points ({{ item.time }})
+                  {% else %}
+                    ❌
+                  {% endif %}
+                </p>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>Encara no hi ha historial.</p>
+          {% endif %}
+        </aside>
       </div>
     {% endif %}
   </main>
